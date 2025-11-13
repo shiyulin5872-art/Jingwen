@@ -965,69 +965,60 @@ Solo performance | Chamber music ensemble performance | Teaching practice
 
   <!-- JavaScript -->
   <script>
-    // Mobile Menu Toggle
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    
-    menuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-      const isOpen = !mobileMenu.classList.contains('hidden');
-      menuToggle.innerHTML = isOpen ? '<i class="fa fa-times"></i>' : '<i class="fa fa-bars"></i>';
-    });
-    
-    // Navbar Scroll Effect
-    const navbar = document.getElementById('navbar');
-    const backToTop = document.getElementById('back-to-top');
-    
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        navbar.classList.add('bg-navy-900', 'bg-blur', 'shadow-lg');
-        navbar.classList.remove('bg-transparent');
-        
-        backToTop.classList.remove('opacity-0', 'invisible');
-        backToTop.classList.add('opacity-100', 'visible');
-      } else {
-        navbar.classList.remove('bg-navy-900', 'bg-blur', 'shadow-lg');
-        navbar.classList.add('bg-transparent');
-        
-        backToTop.classList.add('opacity-0', 'invisible');
-        backToTop.classList.remove('opacity-100', 'visible');
+// ====== Mobile Menu Toggle ======
+const menuToggle = document.getElementById('menu-toggle');
+const mobileMenu = document.getElementById('mobile-menu');
+
+if (menuToggle && mobileMenu) {
+  menuToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+    const isOpen = !mobileMenu.classList.contains('hidden');
+    menuToggle.innerHTML = isOpen ? '<i class="fa fa-times"></i>' : '<i class="fa fa-bars"></i>';
+  });
+}
+
+// ====== Navbar Scroll Effect & Back to Top ======
+const navbar = document.getElementById('navbar');
+const backToTop = document.getElementById('back-to-top');
+window.addEventListener('scroll', () => {
+  if (!navbar || !backToTop) return;
+  if (window.scrollY > 100) {
+    navbar.classList.add('bg-navy-900', 'bg-blur', 'shadow-lg');
+    navbar.classList.remove('bg-transparent');
+    backToTop.classList.remove('opacity-0', 'invisible');
+    backToTop.classList.add('opacity-100', 'visible');
+  } else {
+    navbar.classList.remove('bg-navy-900', 'bg-blur', 'shadow-lg');
+    navbar.classList.add('bg-transparent');
+    backToTop.classList.add('opacity-0', 'invisible');
+    backToTop.classList.remove('opacity-100', 'visible');
+  }
+});
+if (backToTop) {
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// ====== Smooth Scroll for anchor links ======
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const targetId = this.getAttribute('href');
+    if (!targetId || targetId === '#') return;
+    const target = document.querySelector(targetId);
+    if (target) {
+      e.preventDefault();
+      // 关掉移动端菜单
+      if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+        if (menuToggle) menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
       }
-    });
-    
-    // Smooth Scroll for Anchor Links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        // Close mobile menu if open
-        if (!mobileMenu.classList.contains('hidden')) {
-          mobileMenu.classList.add('hidden');
-          menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
-        }
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80,
-            behavior: 'smooth'
-          });
-        }
-      });
-    });
-    
-    // Back to Top Button
-    backToTop.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    });
-    
-    // Animate Elements on Scroll
+      window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+    }
+  });
+});
+
+// ====== Safe animateOnScroll (防止未定义导致报错) ======
 const animateOnScroll = () => {
   document.querySelectorAll('.animate-fade-in, .animate-slide-up').forEach(el => {
     const rect = el.getBoundingClientRect();
@@ -1037,40 +1028,42 @@ const animateOnScroll = () => {
     }
   });
 };
-
-window.addEventListener('scroll', animateOnScroll);
 window.addEventListener('load', animateOnScroll);
+window.addEventListener('scroll', animateOnScroll);
 
-// Collapse toggle for Experience section
+// ====== Experience 折叠：函数 + 事件委托（可靠，不依赖内联 onclick） ======
 function toggleCollapse(header) {
-  const content = header.nextElementSibling;
-  const icon = header.querySelector("i.fa-chevron-down");
-  
-  content.classList.toggle("active");
+  const content = header?.nextElementSibling;
+  const icon = header?.querySelector('i.fa-chevron-down');
+  if (!content) return;
 
-  if (content.classList.contains("active")) {
-    icon.style.transform = "rotate(180deg)";
+  // 切换样式
+  content.classList.toggle('active');
+
+  // 用内联样式确保高度自适应（避免内容超出 800px 时被截断）
+  if (content.classList.contains('active')) {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    if (icon) icon.style.transform = 'rotate(180deg)';
   } else {
-    icon.style.transform = "rotate(0deg)";
+    content.style.maxHeight = '0px';
+    if (icon) icon.style.transform = 'rotate(0deg)';
   }
 }
-    
-// --- 安全补位：给 animateOnScroll 一个简单实现，避免报错 ---
-const animateOnScroll = () => {
-  document.querySelectorAll('.animate-fade-in, .animate-slide-up').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight - 100) {
-      el.style.opacity = 1;
-      el.style.transform = 'none';
-    }
-  });
-};
-    
-// --- 用 JS 方式绑定 Experience 的点击 ---
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('#experience .collapse-header').forEach(header => {
-    header.addEventListener('click', () => toggleCollapse(header));
-  });
+// 暴露到全局以兼容已有的 inline onclick（如果还保留的话）
+window.toggleCollapse = toggleCollapse;
+
+// 事件委托：点击任意 .collapse-header 都能触发（更稳）
+document.addEventListener('click', (e) => {
+  const header = e.target.closest('#experience .collapse-header');
+  if (header) {
+    e.preventDefault();
+    toggleCollapse(header);
+  }
+});
+
+// 首次渲染时把所有折叠块的 maxHeight 设为 0，确保状态干净
+document.querySelectorAll('#experience .collapse-content').forEach(c => {
+  c.style.maxHeight = '0px';
 });
     
  </script>
