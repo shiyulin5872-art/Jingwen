@@ -1054,6 +1054,25 @@ function toggleCollapse(header) {
     icon.style.transform = "rotate(0deg)";
   }
 }
+    
+// --- 安全补位：给 animateOnScroll 一个简单实现，避免报错 ---
+const animateOnScroll = () => {
+  document.querySelectorAll('.animate-fade-in, .animate-slide-up').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 100) {
+      el.style.opacity = 1;
+      el.style.transform = 'none';
+    }
+  });
+};
+    
+// --- 用 JS 方式绑定 Experience 的点击（不再依赖内联 onclick）---
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#experience .collapse-header').forEach(header => {
+    header.addEventListener('click', () => toggleCollapse(header));
+  });
+});
+    
  </script>
 </body>
 </html>
