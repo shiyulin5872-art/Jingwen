@@ -132,6 +132,19 @@
         bottom: 0;
         right: 0;
       }
+
+      /* Awards carousel specific */
+      .awards-track {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+      }
+      .award-item {
+        scroll-snap-align: start;
+      }
+      .carousel-button {
+        transition: transform .15s ease;
+      }
+      .carousel-button:active { transform: scale(.98); }
     }
   </style>
 </head>
@@ -171,7 +184,7 @@
         <a href="#achievements" class="text-white hover:text-gold-400 transition-custom py-2 border-b border-navy-700">Achievements</a>
         <a href="#experience" class="text-white hover:text-gold-400 transition-custom py-2 border-b border-navy-700">Experience</a>
         <a href="#performances" class="text-white hover:text-gold-400 transition-custom py-2 border-b border-navy-700">Media</a>
-        <a href="#repertoire" class="text-white hover:text-gold-400 transition-custom py-2 border-b border-navy-700">Repertoire</a>
+        <a href="#repertoire" class="text-white hover:text-gold-400 transition-custom py-2">Repertoire</a>
         <a href="#contact" class="text-white hover:text-gold-400 transition-custom py-2">Contact</a>
       </div>
     </div>
@@ -320,7 +333,64 @@ Solo performance | Chamber music ensemble performance | Teaching practice
           </div>
         </div>
       </div>
-      
+
+      <!-- NEW: Awards / Certificates horizontal carousel (左右滑动相册) -->
+      <div class="mt-12 max-w-6xl mx-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-serif text-xl font-bold text-navy-900">Certificates</h3>
+          <div class="flex items-center gap-2">
+            <button id="awards-prev" aria-label="Previous certificates" class="carousel-button bg-white p-2 rounded shadow hover:shadow-md focus:outline-none">
+              <i class="fa fa-chevron-left text-navy-900"></i>
+            </button>
+            <button id="awards-next" aria-label="Next certificates" class="carousel-button bg-white p-2 rounded shadow hover:shadow-md focus:outline-none">
+              <i class="fa fa-chevron-right text-navy-900"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div id="awards-track" class="awards-track flex gap-4 overflow-x-auto scrollbar-hide py-4 px-2">
+            <!-- Each item: change src to your certificate images (e.g., cert1.png, cert2.png) -->
+            <div class="award-item flex-shrink-0 w-64 bg-white rounded-sm shadow-md overflow-hidden">
+              <img src="cert1.png" alt="Certificate 1" class="w-full h-40 object-cover">
+              <div class="p-3">
+                <p class="text-sm text-navy-800 font-medium">Certificate Title 1</p>
+                <p class="text-xs text-navy-700/70 mt-1">Issuing Body • 2024</p>
+              </div>
+            </div>
+
+            <div class="award-item flex-shrink-0 w-64 bg-white rounded-sm shadow-md overflow-hidden">
+              <img src="cert2.png" alt="Certificate 2" class="w-full h-40 object-cover">
+              <div class="p-3">
+                <p class="text-sm text-navy-800 font-medium">Certificate Title 2</p>
+                <p class="text-xs text-navy-700/70 mt-1">Issuing Body • 2023</p>
+              </div>
+            </div>
+
+            <div class="award-item flex-shrink-0 w-64 bg-white rounded-sm shadow-md overflow-hidden">
+              <img src="cert3.png" alt="Certificate 3" class="w-full h-40 object-cover">
+              <div class="p-3">
+                <p class="text-sm text-navy-800 font-medium">Certificate Title 3</p>
+                <p class="text-xs text-navy-700/70 mt-1">Issuing Body • 2022</p>
+              </div>
+            </div>
+
+            <div class="award-item flex-shrink-0 w-64 bg-white rounded-sm shadow-md overflow-hidden">
+              <img src="cert4.png" alt="Certificate 4" class="w-full h-40 object-cover">
+              <div class="p-3">
+                <p class="text-sm text-navy-800 font-medium">Certificate Title 4</p>
+                <p class="text-xs text-navy-700/70 mt-1">Issuing Body • 2021</p>
+              </div>
+            </div>
+
+            <!-- Add more items as needed -->
+          </div>
+        </div>
+
+        <p class="text-sm text-navy-700/80 mt-4">Tip: 在移动端用手指左右滑动查看证书。你可以替换上面的 <code>cert1.png</code> 等图片为你的证书图片。</p>
+      </div>
+      <!-- END: Awards carousel -->
+
       <div class="text-center mt-12">
         <div class="inline-flex items-center gap-2 bg-white shadow-md px-6 py-3 rounded-sm">
           <i class="fa fa-certificate text-gold-500 text-xl"></i>
@@ -1065,6 +1135,86 @@ document.addEventListener('click', (e) => {
 document.querySelectorAll('#experience .collapse-content').forEach(c => {
   c.style.maxHeight = '0px';
 });
+
+/* ====== Awards carousel logic ====== */
+(function() {
+  const track = document.getElementById('awards-track');
+  const prevBtn = document.getElementById('awards-prev');
+  const nextBtn = document.getElementById('awards-next');
+
+  if (!track || !prevBtn || !nextBtn) return;
+
+  const ITEM_GAP = 16; // matches gap-4 (4 * 4px base) but safe to calculate using getBoundingClientRect below if needed
+
+  // Helper: scroll by one item width (+ gap)
+  function scrollByItem(direction = 1) {
+    const firstItem = track.querySelector('.award-item');
+    if (!firstItem) return;
+    const itemWidth = firstItem.getBoundingClientRect().width;
+    const scrollAmount = (itemWidth + ITEM_GAP) * direction;
+    track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  }
+
+  prevBtn.addEventListener('click', () => scrollByItem(-1));
+  nextBtn.addEventListener('click', () => scrollByItem(1));
+
+  // Keyboard accessibility: left/right when focus inside carousel
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); scrollByItem(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); scrollByItem(1); }
+  });
+
+  // Make track focusable
+  track.setAttribute('tabindex', '0');
+
+  // Enable dragging with mouse/touch for nicer UX
+  let isDown = false, startX, scrollLeft;
+  track.addEventListener('mousedown', (e) => {
+    isDown = true;
+    track.classList.add('cursor-grabbing');
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+  track.addEventListener('mouseleave', () => {
+    isDown = false;
+    track.classList.remove('cursor-grabbing');
+  });
+  track.addEventListener('mouseup', () => {
+    isDown = false;
+    track.classList.remove('cursor-grabbing');
+  });
+  track.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 1; // scroll-fast factor
+    track.scrollLeft = scrollLeft - walk;
+  });
+
+  // Touch support (native but improved momentum)
+  track.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+  track.addEventListener('touchmove', (e) => {
+    const x = e.touches[0].pageX - track.offsetLeft;
+    const walk = (x - startX) * 1;
+    track.scrollLeft = scrollLeft - walk;
+  });
+
+  // Optional: auto-update button disabled state (visual hint) — simple approach
+  function updateButtons() {
+    if (track.scrollLeft <= 0) prevBtn.disabled = true;
+    else prevBtn.disabled = false;
+
+    const maxScroll = track.scrollWidth - track.clientWidth - 1;
+    if (track.scrollLeft >= maxScroll) nextBtn.disabled = true;
+    else nextBtn.disabled = false;
+  }
+  track.addEventListener('scroll', updateButtons);
+  window.addEventListener('resize', updateButtons);
+  updateButtons();
+})();
     
  </script>
 </body>
